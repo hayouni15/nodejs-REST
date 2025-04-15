@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import validator from "validator";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { Task } from "./task.js";
 
 const schema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -35,6 +36,20 @@ const schema = new mongoose.Schema({
   ],
 });
 
+schema.virtual("tasks", {
+  ref: "Task",
+  localField: "_id",
+  foreignField: "owner",
+});
+
+schema.methods.getPublicUser = function () {
+  const user = this;
+  const userObject = user.toObject();
+  delete userObject.password;
+  delete userObject.tokens;
+  return userObject;
+};
+
 schema.methods.generateToken = async function () {
   const user = this;
   const token = jwt.sign({ user: user._id.toString() }, "thisisasecretstring");
@@ -53,7 +68,9 @@ schema.statics.getUserByCredentials = async (credentials) => {
   return user;
 };
 
+// hash password before saving
 schema.pre("save", async function () {
+  console.log("pre save hook");
   let user = this;
   if (user.isModified("password")) {
     const newPassword = await bcrypt.hash(user.password, 8);
@@ -61,6 +78,17 @@ schema.pre("save", async function () {
   }
 });
 
-const User = mongoose.model("users", schema);
+// remove tasks before removing user
+schema.pre("deleteOne", async function () {
+  const user = this;
+  try {
+    console.log("before findOneAndDelete");
+    await Task.deleteMany({ owner: user._id });
+  } catch (error) {
+    console.log(error);
+    res.send.send(500);
+  }
+});
+const User = mongoose.model("User", schema);
 
 export { User };

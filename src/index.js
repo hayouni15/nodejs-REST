@@ -5,6 +5,7 @@ const { tasksRouter } = require("./routes/tasks");
 const jwt = require("jsonwebtoken");
 
 const app = express();
+
 app.use(express.json()); // Middleware to parse JSON bodies
 app.use(router);
 app.use(tasksRouter);
