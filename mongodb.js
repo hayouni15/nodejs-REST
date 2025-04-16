@@ -36,33 +36,33 @@ async function connect(database) {
   }
 }
 
-// function connect(database) {
-//   let client;
-//   return new Promise((resolve, reject) => {
-//     client = new MongoClient(uri);
-//     client
-//       .connect()
-//       .then(() => {
-//         console.log("Successfully connected to MongoDB!");
-//         resolve(client.db(database)); // Resolve with the database object
-//       })
-//       .catch((error) => {
-//         console.error("Error connecting to MongoDB:", error);
-//         reject(error); // Reject the promise
-//       });
-//   });
-// }
-
-return new Promise((resolve, reject) => {
-  try {
+function connect(database) {
+  let client;
+  return new Promise((resolve, reject) => {
     client = new MongoClient(uri);
-    client.connect().then(() => {
-      resolve(client.db(database));
-    });
-  } catch (error) {
-    reject(err);
-  }
-});
+    client
+      .connect()
+      .then(() => {
+        console.log("Successfully connected to MongoDB!");
+        resolve(client.db(database)); // Resolve with the database object
+      })
+      .catch((error) => {
+        console.error("Error connecting to MongoDB:", error);
+        reject(error); // Reject the promise
+      });
+  });
+}
+
+// return new Promise((resolve, reject) => {
+//   try {
+//     client = new MongoClient(uri);
+//     client.connect().then(() => {
+//       resolve(client.db(database));
+//     });
+//   } catch (error) {
+//     reject(err);
+//   }
+// });
 
 async function insertData(data) {
   const db = await connectToMongoDB(database);
@@ -127,7 +127,6 @@ async function updatData(filter, data) {
     });
 }
 
-getData();
 insertData({ name: "hayou" });
 deletData({ _id: new ObjectId("67f82bfc4a6c6b5c59fe92c6") });
 updatData({ name: "hayou" }, { age: 100 });
